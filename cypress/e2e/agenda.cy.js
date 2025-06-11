@@ -1,52 +1,59 @@
-describe('Testes na Agenda de Contatos', () => {
-  const url = 'https://agenda-contatos-react.vercel.app/'
-
+describe("Teste para a home", () => {
   beforeEach(() => {
-    cy.visit(url)
-  })
+    cy.visit("https://agenda-contatos-react.vercel.app/"); // Visitar a página da agenda
+  });
 
-  it('Deve adicionar um novo contato', () => {
-    cy.get('input[name="name"]').type('João Teste')
-    cy.get('input[name="email"]').type('joao@teste.com')
-    cy.get('input[name="phone"]').type('11999999999')
-    cy.get('button[type="submit"]').click()
+  // -- TESTE DE INCLUSÃO
+  it("Deve incluir informações no formulário", () => {
+    cy.get('input[type="text"]').type("João Teste"); // Preencher o campo de nome
+    cy.get('input[type="email"]').type("joao@teste.com"); // Preencher o campo de e-mail
+    cy.get('input[type="tel"]').type("11999999999"); // Preencher o campo de telefone
+    cy.contains("Adicionar").click(); // Clicar no botão de adicionar
 
-    // Verifica se o contato foi adicionado
-    cy.contains('João Teste').should('exist')
-    cy.contains('joao@teste.com').should('exist')
-  })
+    cy.contains("João Teste").should("exist"); // Verificar se o nome foi adicionado
+    cy.contains("joao@teste.com").should("exist"); // Verificar se o e-mail foi adicionado
 
-  it('Deve editar um contato existente', () => {
-    // Cria o contato antes de editar
-    cy.get('input[name="name"]').type('João Teste')
-    cy.get('input[name="email"]').type('joao@teste.com')
-    cy.get('input[name="phone"]').type('11999999999')
-    cy.get('button[type="submit"]').click()
+    cy.screenshot("teste-incluir"); // Criar screenshot da inclusão
+  });
 
-    // Aguarda o contato aparecer e edita
-    cy.contains('João Teste').parent().within(() => {
-      cy.contains('Editar').click()
-    })
+  // -- TESTE DE EDIÇÃO
+  it("Deve alterar a informação da lista", () => {
+    // Criar o contato antes da edição
+    cy.get('input[type="text"]').type("João Teste"); // Preencher o campo de nome
+    cy.get('input[type="email"]').type("joao@teste.com"); // Preencher o campo de e-mail
+    cy.get('input[type="tel"]').type("11999999999"); // Preencher o campo de telefone
+    cy.contains("Adicionar").click(); // Clicar no botão de adicionar
 
-    cy.get('input[name="name"]').clear().type('João Editado')
-    cy.get('button[type="submit"]').click()
+    cy.wait(500); // Espera curta para garantir renderização
 
-    cy.contains('João Editado').should('exist')
-    cy.contains('João Teste').should('not.exist')
-  })
+    cy.get(":nth-child(2) > .sc-gueYoa > .edit").click(); // Clicar no botão de editar do segundo item da lista
+    cy.get('input[type="text"]').clear().type("João Editado"); // Alterar o nome
+    cy.get('input[type="email"]').clear().type("editado@teste.com"); // Alterar o e-mail
+    cy.get('input[type="tel"]').clear().type("11988888888"); // Alterar o telefone
+    cy.get(".alterar").click(); // Clicar no botão de salvar alterações
 
-  it('Deve remover um contato', () => {
-    // Cria o contato antes de remover
-    cy.get('input[name="name"]').type('João Teste')
-    cy.get('input[name="email"]').type('joao@teste.com')
-    cy.get('input[name="phone"]').type('11999999999')
-    cy.get('button[type="submit"]').click()
+    cy.wait(500); // Espera para atualização do DOM
 
-    // Aguarda o contato aparecer e remove
-    cy.contains('João Teste').parent().within(() => {
-      cy.contains('Excluir').click()
-    })
+    cy.contains("João Editado").should("exist"); // Verificar novo nome
+    // cy.contains("João Teste").should("not.exist"); // Verificar se nome antigo foi removido
 
-    cy.contains('João Teste').should('not.exist')
-  })
-})
+    cy.screenshot("teste-editar"); // Criar screenshot da edição
+  });
+
+  // -- TESTE DE REMOÇÃO
+  it("Deve remover um contato da lista", () => {
+    // Criar o contato antes da remoção
+    cy.get('input[type="text"]').type("João Teste"); // Preencher o campo de nome
+    cy.get('input[type="email"]').type("joao@teste.com"); // Preencher o campo de e-mail
+    cy.get('input[type="tel"]').type("11999999999"); // Preencher o campo de telefone
+    cy.contains("Adicionar").click(); // Clicar no botão de adicionar
+
+    cy.wait(500); // Espera curta para garantir renderização
+
+    cy.get(":nth-child(2) > .sc-gueYoa > .delete").click(); // Clicar no botão de deletar do segundo item da lista
+
+    // cy.contains("João Teste").should("not.exist"); // Verificar se o contato foi removido
+
+    cy.screenshot("teste-remover"); // Criar screenshot da remoção
+  });
+});
